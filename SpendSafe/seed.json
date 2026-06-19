@@ -1,0 +1,110 @@
+[
+  {
+    "id": "rec_0001",
+    "description": "Lunch at cafeteria",
+    "amount": 12.50,
+    "category": "Food",
+    "date": "2025-09-25",
+    "createdAt": "2025-09-25T12:30:00.000Z",
+    "updatedAt": "2025-09-25T12:30:00.000Z"
+  },
+  {
+    "id": "rec_0002",
+    "description": "Chemistry textbook",
+    "amount": 89.99,
+    "category": "Books",
+    "date": "2025-09-23",
+    "createdAt": "2025-09-23T09:15:00.000Z",
+    "updatedAt": "2025-09-23T09:15:00.000Z"
+  },
+  {
+    "id": "rec_0003",
+    "description": "Monthly bus pass",
+    "amount": 45.00,
+    "category": "Transport",
+    "date": "2025-09-20",
+    "createdAt": "2025-09-20T08:00:00.000Z",
+    "updatedAt": "2025-09-20T08:00:00.000Z"
+  },
+  {
+    "id": "rec_0004",
+    "description": "Coffee with friends",
+    "amount": 8.75,
+    "category": "Entertainment",
+    "date": "2025-09-28",
+    "createdAt": "2025-09-28T15:45:00.000Z",
+    "updatedAt": "2025-09-28T15:45:00.000Z"
+  },
+  {
+    "id": "rec_0005",
+    "description": "Semester registration fees",
+    "amount": 350.00,
+    "category": "Fees",
+    "date": "2025-09-01",
+    "createdAt": "2025-09-01T10:00:00.000Z",
+    "updatedAt": "2025-09-01T10:00:00.000Z"
+  },
+  {
+    "id": "rec_0006",
+    "description": "Groceries at campus store",
+    "amount": 27.30,
+    "category": "Food",
+    "date": "2025-09-29",
+    "createdAt": "2025-09-29T17:20:00.000Z",
+    "updatedAt": "2025-09-29T17:20:00.000Z"
+  },
+  {
+    "id": "rec_0007",
+    "description": "Python programming book",
+    "amount": 0.99,
+    "category": "Books",
+    "date": "2025-10-01",
+    "createdAt": "2025-10-01T11:00:00.000Z",
+    "updatedAt": "2025-10-01T11:00:00.000Z"
+  },
+  {
+    "id": "rec_0008",
+    "description": "Cinema ticket",
+    "amount": 15.00,
+    "category": "Entertainment",
+    "date": "2025-10-03",
+    "createdAt": "2025-10-03T20:00:00.000Z",
+    "updatedAt": "2025-10-03T20:00:00.000Z"
+  },
+  {
+    "id": "rec_0009",
+    "description": "Lab equipment fee",
+    "amount": 1250.00,
+    "category": "Fees",
+    "date": "2025-09-15",
+    "createdAt": "2025-09-15T09:00:00.000Z",
+    "updatedAt": "2025-09-15T09:00:00.000Z"
+  },
+  {
+    "id": "rec_0010",
+    "description": "Uber to airport",
+    "amount": 22.40,
+    "category": "Transport",
+    "date": "2025-09-30",
+    "createdAt": "2025-09-30T06:30:00.000Z",
+    "updatedAt": "2025-09-30T06:30:00.000Z"
+  },
+  {
+    "id": "rec_0011",
+    "description": "Tea and snacks",
+    "amount": 3.50,
+    "category": "Food",
+    "date": "2025-10-02",
+    "createdAt": "2025-10-02T10:15:00.000Z",
+    "updatedAt": "2025-10-02T10:15:00.000Z"
+  },
+  {
+    "id": "rec_0012",
+    "description": "Stationery supplies",
+    "amount": 9.10,
+    "category": "Other",
+    "date": "2025-09-26",
+    "createdAt": "2025-09-26T14:00:00.000Z",
+    "updatedAt": "2025-09-26T14:00:00.000Z"
+  }
+]

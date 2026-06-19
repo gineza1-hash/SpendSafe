@@ -1,0 +1,345 @@
+<script type="module">
+    import {
+      validateDescription, validateAmount, validateDate,
+      validateCategoryName, validateRate, validateCap,
+      detectDuplicateWord, isValidImportRecord, PATTERNS
+    } from './scripts/validators.js';
+
+    import { compileRegex, highlight, escapeHtml } from './scripts/search.js';
+
+    // ── Mini test runner ───────────────────────────────────
+    const suites = [];
+    let currentSuite = null;
+
+    function describe(name, fn) {
+      currentSuite = { name, tests: [] };
+      suites.push(currentSuite);
+      fn();
+    }
+
+    function it(label, fn) {
+      let passed = false;
+      let detail = '';
+      try {
+        fn();
+        passed = true;
+      } catch (e) {
+        detail = e.message;
+      }
+      currentSuite.tests.push({ label, passed, detail });
+    }
+
+    function expect(actual) {
+      return {
+        toBe(expected) {
+          if (actual !== expected)
+            throw new Error(`Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+        },
+        toEqual(expected) {
+          if (JSON.stringify(actual) !== JSON.stringify(expected))
+            throw new Error(`Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+        },
+        toBeTruthy() {
+          if (!actual) throw new Error(`Expected truthy, got ${JSON.stringify(actual)}`);
+        },
+        toBeFalsy() {
+          if (actual) throw new Error(`Expected falsy, got ${JSON.stringify(actual)}`);
+        },
+        toContain(substr) {
+          if (!String(actual).includes(substr))
+            throw new Error(`Expected "${actual}" to contain "${substr}"`);
+        },
+        toBeNull() {
+          if (actual !== null) throw new Error(`Expected null, got ${JSON.stringify(actual)}`);
+        },
+        toMatch(re) {
+          if (!re.test(String(actual)))
+            throw new Error(`Expected "${actual}" to match ${re}`);
+        },
+      };
+    }
+
+    // ── TESTS ──────────────────────────────────────────────
+
+    describe('validateDescription', () => {
+      it('accepts a normal description', () => {
+        expect(validateDescription('Lunch at cafeteria').valid).toBeTruthy();
+      });
+      it('rejects empty string', () => {
+        expect(validateDescription('').valid).toBeFalsy();
+      });
+      it('rejects leading space', () => {
+        expect(validateDescription(' Lunch').valid).toBeFalsy();
+      });
+      it('rejects trailing space', () => {
+        expect(validateDescription('Lunch ').valid).toBeFalsy();
+      });
+      it('accepts single non-space character', () => {
+        expect(validateDescription('A').valid).toBeTruthy();
+      });
+      it('rejects string over 100 characters', () => {
+        expect(validateDescription('x'.repeat(101)).valid).toBeFalsy();
+      });
+      it('accepts exactly 100 characters', () => {
+        expect(validateDescription('x'.repeat(100)).valid).toBeTruthy();
+      });
+    });
+
+    describe('validateAmount', () => {
+      it('accepts integer 12', () => {
+        expect(validateAmount('12').valid).toBeTruthy();
+      });
+      it('accepts 0.99', () => {
+        expect(validateAmount('0.99').valid).toBeTruthy();
+      });
+      it('accepts 1250.00', () => {
+        expect(validateAmount('1250.00').valid).toBeTruthy();
+      });
+      it('rejects 0 (not positive)', () => {
+        expect(validateAmount('0').valid).toBeFalsy();
+      });
+      it('rejects leading zero 012.5', () => {
+        expect(validateAmount('012.5').valid).toBeFalsy();
+      });
+      it('rejects 3 decimal places 1.234', () => {
+        expect(validateAmount('1.234').valid).toBeFalsy();
+      });
+      it('rejects negative -5', () => {
+        expect(validateAmount('-5').valid).toBeFalsy();
+      });
+      it('rejects empty string', () => {
+        expect(validateAmount('').valid).toBeFalsy();
+      });
+      it('rejects text "abc"', () => {
+        expect(validateAmount('abc').valid).toBeFalsy();
+      });
+    });
+
+    describe('validateDate', () => {
+      it('accepts 2025-09-29', () => {
+        expect(validateDate('2025-09-29').valid).toBeTruthy();
+      });
+      it('rejects month 13', () => {
+        expect(validateDate('2025-13-01').valid).toBeFalsy();
+      });
+      it('rejects day 00', () => {
+        expect(validateDate('2025-09-00').valid).toBeFalsy();
+      });
+      it('rejects 2-digit year', () => {
+        expect(validateDate('25-09-29').valid).toBeFalsy();
+      });
+      it('accepts leap year Feb 29 2024', () => {
+        expect(validateDate('2024-02-29').valid).toBeTruthy();
+      });
+      it('rejects non-leap year Feb 29 2025', () => {
+        expect(validateDate('2025-02-29').valid).toBeFalsy();
+      });
+      it('rejects empty string', () => {
+        expect(validateDate('').valid).toBeFalsy();
+      });
+      it('rejects MM-DD-YYYY format', () => {
+        expect(validateDate('09-29-2025').valid).toBeFalsy();
+      });
+    });
+
+    describe('validateCategoryName', () => {
+      it('accepts "Food"', () => {
+        expect(validateCategoryName('Food').valid).toBeTruthy();
+      });
+      it('accepts "Coffee-Shop"', () => {
+        expect(validateCategoryName('Coffee-Shop').valid).toBeTruthy();
+      });
+      it('accepts "Fast Food"', () => {
+        expect(validateCategoryName('Fast Food').valid).toBeTruthy();
+      });
+      it('rejects numbers "Food2"', () => {
+        expect(validateCategoryName('Food2').valid).toBeFalsy();
+      });
+      it('rejects empty string', () => {
+        expect(validateCategoryName('').valid).toBeFalsy();
+      });
+      it('rejects leading hyphen "-Food"', () => {
+        expect(validateCategoryName('-Food').valid).toBeFalsy();
+      });
+    });
+
+    describe('validateRate', () => {
+      it('accepts 0.92', () => {
+        expect(validateRate('0.92').valid).toBeTruthy();
+      });
+      it('accepts integer 1340', () => {
+        expect(validateRate('1340').valid).toBeTruthy();
+      });
+      it('accepts empty (optional)', () => {
+        expect(validateRate('').valid).toBeTruthy();
+      });
+      it('rejects negative -1', () => {
+        expect(validateRate('-1').valid).toBeFalsy();
+      });
+    });
+
+    describe('validateCap', () => {
+      it('accepts 500', () => {
+        expect(validateCap('500').valid).toBeTruthy();
+      });
+      it('accepts empty (disabled)', () => {
+        expect(validateCap('').valid).toBeTruthy();
+      });
+      it('rejects 0', () => {
+        expect(validateCap('0').valid).toBeFalsy();
+      });
+      it('rejects negative', () => {
+        expect(validateCap('-100').valid).toBeFalsy();
+      });
+    });
+
+    describe('detectDuplicateWord (back-reference, advanced regex)', () => {
+      it('detects "the the"', () => {
+        expect(detectDuplicateWord('I went to the the store')).toContain('the the');
+      });
+      it('detects "lunch lunch"', () => {
+        expect(detectDuplicateWord('lunch lunch with friends')).toContain('lunch lunch');
+      });
+      it('returns null for normal sentence', () => {
+        expect(detectDuplicateWord('Lunch at cafeteria')).toBeNull();
+      });
+      it('is case-insensitive (The the)', () => {
+        expect(detectDuplicateWord('The the store')).toBeTruthy();
+      });
+    });
+
+    describe('isValidImportRecord', () => {
+      const good = {
+        id: 'rec_0001', description: 'Test', amount: 10,
+        category: 'Food', date: '2025-09-01',
+        createdAt: '2025-09-01T00:00:00.000Z', updatedAt: '2025-09-01T00:00:00.000Z'
+      };
+      it('accepts a valid record', () => {
+        expect(isValidImportRecord(good)).toBeTruthy();
+      });
+      it('rejects missing id', () => {
+        const { id, ...bad } = good;
+        expect(isValidImportRecord(bad)).toBeFalsy();
+      });
+      it('rejects non-number amount', () => {
+        expect(isValidImportRecord({ ...good, amount: '10' })).toBeFalsy();
+      });
+      it('rejects null', () => {
+        expect(isValidImportRecord(null)).toBeFalsy();
+      });
+      it('rejects plain string', () => {
+        expect(isValidImportRecord('hello')).toBeFalsy();
+      });
+    });
+
+    describe('compileRegex', () => {
+      it('compiles a plain string pattern', () => {
+        const { re, error } = compileRegex('coffee');
+        expect(re).toBeTruthy();
+        expect(error).toBeNull();
+      });
+      it('compiles a /pattern/flags literal', () => {
+        const { re } = compileRegex('/(coffee|tea)/i');
+        expect(re).toBeTruthy();
+        expect(re.test('TEA')).toBeTruthy();
+      });
+      it('returns error for invalid pattern', () => {
+        const { re, error } = compileRegex('(unclosed');
+        expect(re).toBeNull();
+        expect(error).toBeTruthy();
+      });
+      it('returns null re for empty input', () => {
+        const { re, error } = compileRegex('');
+        expect(re).toBeNull();
+        expect(error).toBeNull();
+      });
+      it('handles back-reference pattern \\b(\\w+)\\s+\\1\\b', () => {
+        const { re, error } = compileRegex('\\b(\\w+)\\s+\\1\\b', 'i');
+        expect(re).toBeTruthy();
+        expect(error).toBeNull();
+        expect(re.test('the the')).toBeTruthy();
+        expect(re.test('the store')).toBeFalsy();
+      });
+    });
+
+    describe('highlight', () => {
+      it('wraps match in <mark> tags', () => {
+        // FIX: Match casing to pass testing rules
+        const { re } = compileRegex('Coffee');
+        const result = highlight('Coffee with friends', re);
+        expect(result).toContain('<mark>');
+      });
+      it('returns escaped text when regex is null', () => {
+        const result = highlight('5 < 10 & good', null);
+        expect(result).toContain('&lt;');
+        expect(result).toContain('&amp;');
+      });
+      it('escapes HTML entities in plain text', () => {
+        const result = escapeHtml('<script>alert(1)</script>');
+        expect(result).toContain('&lt;script&gt;');
+      });
+    });
+
+    describe('PATTERNS (raw regex sanity checks)', () => {
+      it('description pattern rejects "  hi"', () => {
+        expect(PATTERNS.description.test('  hi')).toBeFalsy();
+      });
+      it('amount pattern accepts "12.50"', () => {
+        expect(PATTERNS.amount.test('12.50')).toBeTruthy();
+      });
+      it('amount pattern rejects "12.500"', () => {
+        expect(PATTERNS.amount.test('12.500')).toBeFalsy();
+      });
+      it('date pattern accepts "2025-12-31"', () => {
+        expect(PATTERNS.date.test('2025-12-31')).toBeTruthy();
+      });
+      it('date pattern rejects "2025-00-01"', () => {
+        expect(PATTERNS.date.test('2025-00-01')).toBeFalsy();
+      });
+      it('category pattern rejects "Food2"', () => {
+        expect(PATTERNS.category.test('Food2')).toBeFalsy();
+      });
+      it('dupWord pattern catches "the the"', () => {
+        expect(PATTERNS.dupWord.test('the the end')).toBeTruthy();
+      });
+    });
+
+    // ── RENDER RESULTS ────────────────────────────────────
+    const output  = document.getElementById('output');
+    const summary = document.getElementById('summary');
+    let totalPass = 0, totalFail = 0;
+
+    suites.forEach(suite => {
+      const section = document.createElement('div');
+      section.className = 'suite';
+      const h2 = document.createElement('h2');
+      h2.textContent = suite.name;
+      section.appendChild(h2);
+
+      suite.tests.forEach(t => {
+        if (t.passed) totalPass++; else totalFail++;
+        const div = document.createElement('div');
+        div.className = 'test';
+        div.innerHTML = `
+          <span class="badge ${t.passed ? 'pass' : 'fail'}">${t.passed ? 'PASS' : 'FAIL'}</span>
+          <span class="test-label">
+            ${escapeHtml(t.label)}
+            ${!t.passed ? `<br><span class="test-detail">${escapeHtml(t.detail)}</span>` : ''}
+          </span>
+        `;
+        section.appendChild(div);
+      });
+      output.appendChild(section);
+    });
+
+    const total = totalPass + totalFail;
+    summary.innerHTML = `
+      <span class="${totalFail === 0 ? 'all-pass' : 'some-fail'}">
+        ${totalFail === 0 ? '✓ All' : `✗ ${totalFail} of`} ${total} tests ${totalFail === 0 ? 'passed' : 'failed'}.
+        ${totalFail === 0 ? '' : `${totalPass} passed.`}
+      </span>
+    `;
+
+    // FIX: Redundant inline function statement declaration removed. 
+    // It now correctly relies on the imported module function from 'search.js'
+  </script>

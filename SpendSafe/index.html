@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeSpend – Student Finance Tracker</title>
+  <link rel="stylesheet" href="styles/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Skip to content link for keyboard users -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+ 
+  <header class="site-header" role="banner">
+    <a href="#dashboard" data-page="dashboard" class="logo-link" aria-label="SafeSpend Home Dashboard">
+  <span class="site-logo">SafeSpend</span>
+    </a>
+      <nav class="main-nav" role="navigation" aria-label="Main navigation">
+        <ul role="list">
+          <li><a href="#dashboard" class="nav-link" data-page="dashboard">Dashboard</a></li>
+          <li><a href="#transactions" class="nav-link" data-page="transactions">Transactions</a></li>
+          <li><a href="#add" class="nav-link" data-page="add">Add</a></li>
+          <li><a href="#settings" class="nav-link" data-page="settings">Settings</a></li>
+          <li><a href="#about" class="nav-link" data-page="about">About</a></li>
+        </ul>
+      </nav>
+      <button id="hamburger-btn" class="hamburger" aria-expanded="false" aria-controls="mobile-nav" aria-label="Toggle Navigation Menu">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" role="navigation" aria-label="Mobile navigation" hidden>
+      <ul role="list">
+        <li><a href="#dashboard" class="nav-link" data-page="dashboard">Dashboard</a></li>
+        <li><a href="#transactions" class="nav-link" data-page="transactions">Transactions</a></li>
+        <li><a href="#add" class="nav-link" data-page="add">Add Transaction</a></li>
+        <li><a href="#settings" class="nav-link" data-page="settings">Settings</a></li>
+        <li><a href="#about" class="nav-link" data-page="about">About</a></li>
+      </ul>
+    </nav>
+  </header>
+ 
+  <main id="main-content" role="main">
+ 
+    <!-- DASHBOARD PAGE -->
+    <section id="page-dashboard" class="page active" aria-labelledby="dashboard-heading">
+      <div class="page-inner">
+        <header class="page-header">
+          <h1 id="dashboard-heading">Dashboard</h1>
+          <p class="page-subtitle">Your financial snapshot</p>
+        </header>
+ 
+        <div class="stats-grid">
+          <article class="stat-card" aria-label="Total transactions">
+            <span class="stat-label">Total Transactions</span>
+            <span class="stat-value" id="stat-total-count">0</span>
+          </article>
+          <article class="stat-card accent" aria-label="Total spent">
+            <span class="stat-label">Total Spent</span>
+            <span class="stat-value" id="stat-total-spent">0.00</span>
+            <span class="stat-currency" id="stat-currency-symbol">USD</span>
+          </article>
+          <article class="stat-card" aria-label="Top category">
+            <span class="stat-label">Top Category</span>
+            <span class="stat-value" id="stat-top-category">—</span>
+          </article>
+          <article class="stat-card" aria-label="This week">
+            <span class="stat-label">Last 7 Days</span>
+            <span class="stat-value" id="stat-week-total">0.00</span>
+          </article>
+        </div>
+ 
+        <!-- Cap/Budget Section -->
+        <section class="budget-section" aria-labelledby="budget-heading">
+          <div class="budget-header">
+            <h2 id="budget-heading">Monthly Budget</h2>
+            <span class="budget-cap-display" id="budget-cap-display"></span>
+          </div>
+          <div class="budget-bar-wrap" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Budget usage" id="budget-bar-wrap">
+            <div class="budget-bar" id="budget-bar"></div>
+          </div>
+          <!-- ARIA live region: polite when under, assertive when over -->
+          <p class="budget-status" id="budget-status" role="status" aria-live="polite" aria-atomic="true"></p>
+        </section>
+ 
+        <!-- 7-day trend chart -->
+        <section class="trend-section" aria-labelledby="trend-heading">
+          <h2 id="trend-heading">7-Day Spending Trend</h2>
+          <div class="chart-wrap" role="img" aria-label="Bar chart of spending in the last 7 days" id="trend-chart">
+            <!-- JS renders bars here -->
+          </div>
+          <div class="chart-labels" id="chart-labels" aria-hidden="true"></div>
+        </section>
+ 
+        <!-- Category breakdown -->
+        <section class="category-section" aria-labelledby="cat-heading">
+          <h2 id="cat-heading">Spending by Category</h2>
+          <ul class="category-list" id="category-breakdown" role="list">
+            <li class="empty-state">No transactions yet. <a href="#add" data-page="add" class="inline-link">Add one now →</a></li>
+          </ul>
+        </section>
+      </div>
+    </section>
+ 
+    <!-- TRANSACTIONS PAGE -->
+    <section id="page-transactions" class="page" aria-labelledby="transactions-heading" hidden>
+      <div class="page-inner">
+        <header class="page-header">
+          <h1 id="transactions-heading">Transactions</h1>
+          <p class="page-subtitle">All your recorded expenses</p>
+        </header>
+ 
+        <div class="toolbar">
+          <div class="search-wrap">
+            <label for="search-input" class="sr-only">Search transactions</label>
+            <input
+              type="text"
+              id="search-input"
+              class="search-input"
+              placeholder="Search or enter regex pattern…"
+              autocomplete="off"
+              aria-describedby="search-hint search-error"
+            />
+            <button class="search-case-btn" id="search-case-btn" aria-pressed="false" title="Toggle case sensitive">Aa</button>
+            <span id="search-error" class="search-error" role="alert" aria-live="assertive"></span>
+          </div>
+          <p id="search-hint" class="search-hint">Tip: Try <code>/(coffee|tea)/i</code> or <code>\b(\w+)\s+\1\b</code> for advanced search.</p>
+          <div class="sort-wrap">
+            <label for="sort-select" class="sr-only">Sort by</label>
+            <select id="sort-select" class="sort-select" aria-label="Sort transactions">
+              <option value="date-desc">Date (Newest first)</option>
+              <option value="date-asc">Date (Oldest first)</option>
+              <option value="desc-asc">Description A → Z</option>
+              <option value="desc-desc">Description Z → A</option>
+              <option value="amount-asc">Amount (Low → High)</option>
+              <option value="amount-desc">Amount (High → Low)</option>
+            </select>
+          </div>
+          <div class="action-btns">
+            <button class="btn btn-secondary" id="export-btn" aria-label="Export transactions as JSON">Export JSON</button>
+            <label class="btn btn-secondary import-label" for="import-input" tabindex="0">
+              Import JSON
+              <input type="file" id="import-input" accept=".json" class="sr-only" aria-label="Import JSON file" />
+            </label>
+          </div>
+        </div>
+ 
+        <!-- Import status live region -->
+        <p id="import-status" class="import-status" role="status" aria-live="polite" aria-atomic="true"></p>
+ 
+        <!-- Results count -->
+        <p class="results-count" id="results-count" aria-live="polite" aria-atomic="true"></p>
+ 
+        <div class="table-wrap" role="region" aria-label="Transactions table" tabindex="0">
+          <table id="transactions-table" aria-label="Transactions">
+            <thead>
+              <tr>
+                <th scope="col">Description</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Category</th>
+                <th scope="col">Date</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="transactions-tbody">
+              <!-- JS renders rows here -->
+            </tbody>
+          </table>
+        </div>
+        <p class="empty-table-msg" id="empty-table-msg" hidden>No transactions found. Try a different search or <a href="#add" data-page="add" class="inline-link">add a transaction</a>.</p>
+      </div>
+    </section>
+ 
+    <!-- ADD / EDIT PAGE -->
+    <section id="page-add" class="page" aria-labelledby="add-heading" hidden>
+      <div class="page-inner page-inner--narrow">
+        <header class="page-header">
+          <h1 id="add-heading">Add Transaction</h1>
+          <p class="page-subtitle" id="form-subtitle">Fill in the details below</p>
+        </header>
+ 
+        <!-- General form error live region -->
+        <div role="alert" aria-live="assertive" id="form-error-banner" class="form-error-banner" hidden></div>
+ 
+        <form id="transaction-form" novalidate aria-label="Transaction form">
+          <input type="hidden" id="edit-id" value="" />
+ 
+          <div class="form-group">
+  <label for="input-date">Date <span class="required-mark" aria-hidden="true">*</span></label>
+  <input type="date" id="input-date" required>
+  <div id="date-error" class="field-error" role="alert"></div>
+</div>
+
+       <div class="form-group">
+        <label for="input-category">Category <span class="required-mark" aria-hidden="true">*</span></label>
+        <select id="input-category" required></select>
+        <div id="cat-error" class="field-error" role="alert"></div>
+       </div>
+
+       <div class="form-group">
+        <label for="input-description">Description <span class="required-mark" aria-hidden="true">*</span></label>
+        <input type="text" id="input-description" placeholder="e.g., Chemistry textbook" required maxlength="100">
+        <div id="desc-error" class="field-error" role="alert"></div>
+        <div id="dup-word-group" class="dup-word-warning" hidden><span id="dup-word-msg"></span></div>
+       </div>
+
+       <div class="form-group">
+        <label for="input-amount">Amount <span class="required-mark" aria-hidden="true">*</span></label>
+        <div class="amount-wrap">
+        <span class="currency-prefix" id="amount-prefix"></span>
+        <input type="text" id="input-amount" placeholder="0.00" required>
+       </div>
+        <div id="amount-error" class="field-error" role="alert"></div>
+       </div>
+ 
+          <!-- Advanced regex: duplicate word detector -->
+          <div class="form-group" id="dup-word-group" hidden>
+            <p class="dup-word-warning" role="alert" aria-live="polite" id="dup-word-msg"></p>
+          </div>
+ 
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="submit-btn">Add Transaction</button>
+            <button type="button" class="btn btn-ghost" id="cancel-edit-btn" hidden>Cancel Edit</button>
+          </div>
+        </form>
+ 
+        <!-- Success message -->
+        <p class="form-success" id="form-success" role="status" aria-live="polite" hidden></p>
+      </div>
+    </section>
+ 
+    <!-- SETTINGS PAGE -->
+    <section id="page-settings" class="page" aria-labelledby="settings-heading" hidden>
+      <div class="page-inner page-inner--narrow">
+        <header class="page-header">
+          <h1 id="settings-heading">Settings</h1>
+          <p class="page-subtitle">Customize your experience</p>
+        </header>
+ 
+        <form id="settings-form" aria-label="App settings" novalidate>
+ 
+          <fieldset class="settings-fieldset">
+            <legend>Currency</legend>
+            <div class="form-group">
+              <label for="base-currency">Base Currency</label>
+              <select id="base-currency" aria-describedby="currency-hint">
+                <option value="USD">USD – US Dollar ($)</option>
+                <option value="EUR">EUR – Euro (€)</option>
+                <option value="GBP">GBP – British Pound (£)</option>
+                <option value="RWF">RWF – Rwandan Franc (RWF)</option>
+                <option value="KES">KES – Kenyan Shilling (KSh)</option>
+                <option value="NGN">NGN – Nigerian Naira (₦)</option>
+              </select>
+              <span id="currency-hint" class="field-hint">All amounts display in this currency.</span>
+            </div>
+ 
+            <div class="exchange-rates-section">
+              <h3>Manual Exchange Rates</h3>
+              <p class="field-hint">Enter how many units of each currency equal 1 USD.</p>
+              <div class="rates-grid">
+                <div class="form-group">
+                  <label for="rate-eur">1 USD → EUR</label>
+                  <input type="text" id="rate-eur" placeholder="0.92" inputmode="decimal" aria-describedby="rate-eur-error" />
+                  <span id="rate-eur-error" class="field-error" role="alert" aria-live="polite"></span>
+                </div>
+                <div class="form-group">
+                  <label for="rate-gbp">1 USD → GBP</label>
+                  <input type="text" id="rate-gbp" placeholder="0.79" inputmode="decimal" aria-describedby="rate-gbp-error" />
+                  <span id="rate-gbp-error" class="field-error" role="alert" aria-live="polite"></span>
+                </div>
+                <div class="form-group">
+                  <label for="rate-rwf">1 USD → RWF</label>
+                  <input type="text" id="rate-rwf" placeholder="1340" inputmode="decimal" aria-describedby="rate-rwf-error" />
+                  <span id="rate-rwf-error" class="field-error" role="alert" aria-live="polite"></span>
+                </div>
+                <div class="form-group">
+                  <label for="rate-kes">1 USD → KES</label>
+                  <input type="text" id="rate-kes" placeholder="129" inputmode="decimal" aria-describedby="rate-kes-error" />
+                  <span id="rate-kes-error" class="field-error" role="alert" aria-live="polite"></span>
+                </div>
+                <div class="form-group">
+                  <label for="rate-ngn">1 USD → NGN</label>
+                  <input type="text" id="rate-ngn" placeholder="1600" inputmode="decimal" aria-describedby="rate-ngn-error" />
+                  <span id="rate-ngn-error" class="field-error" role="alert" aria-live="polite"></span>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+ 
+          <fieldset class="settings-fieldset">
+            <legend>Budget / Spending Cap</legend>
+            <div class="form-group">
+              <label for="monthly-cap">Monthly Budget Cap</label>
+              <input type="text" id="monthly-cap" placeholder="e.g. 500" inputmode="decimal" aria-describedby="cap-hint cap-error" />
+              <span id="cap-hint" class="field-hint">Leave blank to disable the budget tracker.</span>
+              <span id="cap-error" class="field-error" role="alert" aria-live="polite"></span>
+            </div>
+          </fieldset>
+ 
+          <fieldset class="settings-fieldset">
+            <legend>Categories</legend>
+            <p class="field-hint">Manage your expense categories.</p>
+            <ul class="categories-list" id="categories-list" role="list" aria-label="Current categories"></ul>
+            <div class="add-category-wrap">
+              <label for="new-category-input" class="sr-only">New category name</label>
+              <input type="text" id="new-category-input" placeholder="New category name" aria-describedby="new-cat-error" />
+              <button type="button" class="btn btn-secondary" id="add-category-btn">Add</button>
+              <span id="new-cat-error" class="field-error" role="alert" aria-live="polite"></span>
+            </div>
+          </fieldset>
+ 
+          <fieldset class="settings-fieldset structural-export-zone">
+           <legend>Data Portability</legend>
+           <h3>Spreadsheet Export Portal</h3>
+           <p class="field-hint" style="margin-bottom: var(--space-md);">
+             Export your entire SafeSpend transaction ledger instantly into a standard, universal CSV spreadsheet file compatible with Microsoft Excel, Numbers, and Google Sheets.
+           </p>
+           <div class="form-actions" style="margin-top: 0;">
+            <button type="button" id="export-csv-btn" class="btn btn-secondary">
+             📊 Export Ledger to CSV
+            </button>
+           </div>
+          </fieldset>>
+ 
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Settings</button>
+          </div>
+        </form>
+        <p id="settings-saved-msg" class="form-success" role="status" aria-live="polite" hidden></p>
+      </div>
+    </section>
+ 
+    <!-- ABOUT PAGE -->
+    <section id="page-about" class="page" hidden>
+  <div class="page-inner">
+    <h1>About SafeSpend</h1>
+    <p class="about-lead">A high-fidelity, secure, client-side personal ledger built specifically for students to monitor educational overhead, log daily expenses, and track personal budgets.</p>
+    
+    <div class="about-content">
+      <section aria-labelledby="about-purpose-heading">
+        <h2 id="about-purpose-heading">Application Purpose</h2>
+        <p>SafeSpend was engineered as a professional, vanilla web development portfolio showcase. It demonstrates modular client-side state architectures, secure manual currency conversion pipelines, complex client-side validation loops via regular expressions, and semantic web designs engineered from a strict mobile-first paradigm.</p>
+      </section>
+
+      <section aria-labelledby="about-tech-heading">
+        <h2 id="about-tech-heading">Architecture Commitments</h2>
+        <ul>
+          <li><strong>Zero Framework Footprint:</strong> Built completely with native Web Technologies (Vanilla ES Modules, CSS variables, and HTML5 semantic markup).</li>
+          <li><strong>Privacy Centric:</strong> No database cookies, tracking systems, or background tracking APIs. Your financial history lives fully within your device data bounds.</li>
+          <li><strong>Accessible Controls:</strong> Native compliance with assistive tech loops, ARIA live regions for budget updates, and strict focus state capture.</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="about-developer-heading">
+        <h2 id="about-developer-heading">Developer Portal</h2>
+        <p>For inquiries, open issues, or deployment source validation audits, connect through these verified contact handles:</p>
+        <ul class="contact-list">
+          <li>
+            <strong>GitHub Repository:</strong> 
+            <a href="https://github.com/gineza1-hash" class="about-link" target="_blank" rel="noopener noreferrer">@gineza1-hash</a>
+          </li>
+          <li>
+            <strong>Academic Contact:</strong> 
+            <a href="mailto:g.ineza1@alustudent.com" class="about-link">g.ineza1@alustudent.com</a>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</section>
+ 
+  </main>
+ 
+  <!-- Confirm delete dialog -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal">
+      <h2 id="modal-title">Delete Transaction?</h2>
+      <p id="modal-body">This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn btn-danger" id="modal-confirm-btn">Yes, Delete</button>
+        <button class="btn btn-ghost" id="modal-cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+ 
+  <footer class="site-footer" role="contentinfo">
+    <p>SafeSpend &copy; 2026 &mdash; Student Finance Tracker &mdash; Built by Elsie Glenna</p>
+  </footer>
+ 
+  <script type="module" src="scripts/main.js"></script>
+</body>
+</html>
